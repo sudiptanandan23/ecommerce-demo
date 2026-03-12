@@ -12,10 +12,8 @@ password:document.getElementById("password").value
 })
 })
 .then(()=>{
-
-alert("Registered")
+alert("Registered successfully")
 window.location="login.html"
-
 })
 
 }
@@ -34,10 +32,8 @@ password:document.getElementById("password").value
 .then(data=>{
 
 if(data.success){
-
 localStorage.setItem("user",JSON.stringify(data.user))
 window.location="products.html"
-
 }else{
 alert("Invalid login")
 }
@@ -101,6 +97,7 @@ items.forEach(i=>{
 
 let p=document.createElement("p")
 p.innerText=i.name+" - $"+i.price
+
 div.appendChild(p)
 
 })
