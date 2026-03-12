@@ -7,12 +7,6 @@ return;
 
 SalesforceInteractions.setLoggingLevel("DEBUG");
 
-SalesforceInteractions.init({
-cookieDomain: window.location.hostname
-}).then(()=>{
-
-console.log("SDK Initialized");
-
 /* GLOBAL VARIABLES */
 
 const USER_EMAIL = "sudipta_nandan+carttest@epam.com";
@@ -33,20 +27,16 @@ sessionId="session-"+Date.now();
 sessionStorage.setItem("sessionId",sessionId);
 }
 
-/* CONSENT */
-
-SalesforceInteractions.updateConsents([{
-status: SalesforceInteractions.ConsentStatus.OptIn,
-purpose: SalesforceInteractions.ConsentPurpose.Tracking,
-provider:"Website"
-}]);
-
-
 /* GLOBAL EVENT FUNCTION */
 
-function sendEvent(name,type,attributes,catalog){
+window.sendEvent = function(name,type,attributes,catalog){
 
-SalesforceInteractions.sendEvent({
+if(typeof SalesforceInteractions === "undefined"){
+console.warn("SDK not ready");
+return;
+}
+
+let eventPayload = {
 
 interaction:{
 name:name,
@@ -64,8 +54,6 @@ email:USER_EMAIL
 }
 },
 
-catalogObject: catalog || null,
-
 attributes: attributes || {},
 
 sourceUrl:window.location.href,
@@ -73,11 +61,36 @@ sourceUrlReferrer:document.referrer,
 
 dateTime:new Date().toISOString()
 
-});
+};
+
+/* ADD CATALOG IF PRESENT */
+
+if(catalog){
+eventPayload.catalogObject = catalog;
+}
+
+SalesforceInteractions.sendEvent(eventPayload);
 
 console.log("Event Sent:",name);
 
-}
+};
+
+
+/* INIT SDK */
+
+SalesforceInteractions.init({
+cookieDomain: window.location.hostname
+});
+
+console.log("SDK Initialized");
+
+/* CONSENT */
+
+SalesforceInteractions.updateConsents([{
+status: SalesforceInteractions.ConsentStatus.OptIn,
+purpose: SalesforceInteractions.ConsentPurpose.Tracking,
+provider:"Website"
+}]);
 
 
 /* PAGE VIEW */
@@ -177,7 +190,7 @@ productName:product.name
 };
 
 
-/* CHECKOUT START */
+/* CHECKOUT */
 
 window.trackCheckout=function(cartTotal){
 
@@ -209,7 +222,7 @@ itemCount:order.items.length
 };
 
 
-/* ABANDONED CART */
+/* ABANDON CART */
 
 window.addEventListener("beforeunload",function(){
 
@@ -229,6 +242,4 @@ cartSize:cart.length
 
 });
 
-
-});
 });
