@@ -1,15 +1,21 @@
 <!DOCTYPE html>
 <html>
+
 <head>
-<meta charset="UTF-8">
-<title>Ecommerce Store</title>
-  <script src="https://cdn.c360a.salesforce.com/beacon/c360a/37350531-11e8-4591-a7b6-643ba484d8c5/scripts/c360a.min.js"></script>
+
+<title>Ecommerce Demo</title>
+
+<!-- Salesforce Data Cloud Web SDK -->
+<script src="https://cdn.c360a.salesforce.com/beacon/c360a/37350531-11e8-4591-a7b6-643ba484d8c5/scripts/c360a.min.js"></script>
+
 <link rel="stylesheet" href="style.css">
+
 </head>
 
 <body>
 
 <header>
+
 <h1>My Ecommerce Store</h1>
 
 <nav>
@@ -19,15 +25,17 @@
 <a href="login.html">Login</a>
 <a href="register.html">Register</a>
 </nav>
+
 </header>
 
-<section class="hero">
 
-<img src="https://picsum.photos/1200/400?shopping">
+<section style="text-align:center;margin-top:40px;">
 
-<h2>Best Online Shopping</h2>
+<h2>Welcome to Our Store</h2>
 
-<p>Find the best products at affordable prices.</p>
+<p>Discover amazing products at great prices.</p>
+
+<br>
 
 <a href="products.html">
 <button>Shop Now</button>
@@ -35,5 +43,25 @@
 
 </section>
 
+
+<section class="featured-products">
+
+<h2 style="text-align:center;">Featured Products</h2>
+
+<div id="products" class="products"></div>
+
+</section>
+
+
+<script src="app.js"></script>
+
+<script>
+
+updateCartCounter()
+loadProducts()
+
+</script>
+
 </body>
+
 </html>
