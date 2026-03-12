@@ -24,12 +24,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         let pageStartTime = Date.now();
 
-        /* ---------------- CONSENT ---------------- */
-        SalesforceInteractions.updateConsents([{
-            status: SalesforceInteractions.ConsentStatus.OptIn,
-            purpose: SalesforceInteractions.ConsentPurpose.Tracking,
-            provider: "Website"
-        }]).then(() => console.log("Consent updated"));
+
 
         /* ---------------- HELPER FUNCTION ---------------- */
         function sendEvent(name, type, attributes = {}, catalog = null) {
