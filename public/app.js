@@ -1,3 +1,8 @@
+/* ---------------- DATA CLOUD DEMO USER ---------------- */
+
+const DATA_CLOUD_EMAIL = "sudipta_nandan+carttest@epam.com"
+
+
 /* ---------------- USER SESSION ---------------- */
 
 let user = JSON.parse(localStorage.getItem("user")) || null
@@ -130,8 +135,9 @@ cart.push(product)
 
 localStorage.setItem("cart",JSON.stringify(cart))
 
-// Send event to Data Cloud
-sendAddToCartEvent(product)
+sendDataCloudEvent("AddToCart", product)
+
+updateCartCounter()
 
 alert(product.name + " added to cart")
 
@@ -319,14 +325,10 @@ alert("Cart is empty")
 return
 }
 
-/* Customer information */
-
 let name = document.getElementById("name")?.value || user?.name || "Guest"
-let email = document.getElementById("email")?.value || user?.email || "guest@email.com"
+let email = document.getElementById("email")?.value || user?.email || DATA_CLOUD_EMAIL
 let phone = document.getElementById("phone")?.value || ""
 let address = document.getElementById("address")?.value || ""
-
-/* Create order */
 
 let order = {
 
@@ -414,44 +416,50 @@ let cart = JSON.parse(localStorage.getItem("cart")) || []
 
 if(cart.length>0){
 
-sendDataCloudEvent("AbandonedCart",{
-cartSize:cart.length
-})
+sendDataCloudEvent("AbandonedCart")
 
 }
 
 })
 
 
-/* ---------------- DATACLOUD EVENT ---------------- */
+/* ---------------- DATA CLOUD EVENT ---------------- */
 
 function sendDataCloudEvent(eventType,product={}){
 
-const eventPayload={
-
-eventType:eventType,
-email:user?.email || "guest",
-productName:product.name || "",
-price:product.price || "",
-timestamp:new Date().toISOString()
-
+if(typeof SalesforceInteractions === "undefined"){
+console.log("Salesforce Web SDK not loaded")
+return
 }
 
-fetch("https://YOUR-DATACLOUD-ENDPOINT/events",{
+SalesforceInteractions.sendEvent({
 
-method:"POST",
-
-headers:{
-"Content-Type":"application/json"
+interaction:{
+name:eventType
 },
 
-body:JSON.stringify(eventPayload)
+user:{
+identities:{
+email: DATA_CLOUD_EMAIL
+}
+},
+
+catalogObject: product.id ? {
+
+type:"Product",
+
+id:product.id,
+
+attributes:{
+name:product.name || "",
+price:product.price || "",
+imageUrl:product.image || ""
+}
+
+} : undefined
 
 })
-.catch(()=>{
 
-console.log("DataCloud endpoint not connected")
-
-})
+console.log("Event sent to Data Cloud:", eventType)
 
 }
