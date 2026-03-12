@@ -1,56 +1,43 @@
 let user = JSON.parse(localStorage.getItem("user"))
 
+/* ---------------- REGISTER ---------------- */
+
 function register(){
 
-fetch("/register",{
+let users = JSON.parse(localStorage.getItem("users")) || []
 
-method:"POST",
-headers:{'Content-Type':'application/json'},
-
-body:JSON.stringify({
-
+let newUser = {
 name:document.getElementById("name").value,
 email:document.getElementById("email").value,
 password:document.getElementById("password").value
+}
 
-})
+users.push(newUser)
 
-})
-.then(()=>{
+localStorage.setItem("users",JSON.stringify(users))
 
 sendDataCloudEvent("UserRegistered")
 
-alert("Registered")
+alert("Registration successful")
 
 window.location="login.html"
 
-})
-
 }
+
+/* ---------------- LOGIN ---------------- */
 
 function login(){
 
-fetch("/login",{
+let users = JSON.parse(localStorage.getItem("users")) || []
 
-method:"POST",
-headers:{'Content-Type':'application/json'},
+let email=document.getElementById("email").value
+let password=document.getElementById("password").value
 
-body:JSON.stringify({
+let found = users.find(u => u.email===email && u.password===password)
 
-email:document.getElementById("email").value,
-password:document.getElementById("password").value
+if(found){
 
-})
-
-})
-
-.then(res=>res.json())
-
-.then(data=>{
-
-if(data.success){
-
-localStorage.setItem("user",JSON.stringify(data.user))
+localStorage.setItem("user",JSON.stringify(found))
 
 sendDataCloudEvent("UserLogin")
 
@@ -62,17 +49,43 @@ alert("Invalid login")
 
 }
 
-})
-
 }
+
+/* ---------------- PRODUCTS ---------------- */
 
 function loadProducts(){
 
-fetch("/products")
+const products=[
 
-.then(res=>res.json())
+{
+id:1,
+name:"Laptop",
+price:900,
+image:"https://picsum.photos/250?1"
+},
 
-.then(products=>{
+{
+id:2,
+name:"Smartphone",
+price:600,
+image:"https://picsum.photos/250?2"
+},
+
+{
+id:3,
+name:"Headphones",
+price:120,
+image:"https://picsum.photos/250?3"
+},
+
+{
+id:4,
+name:"Smart Watch",
+price:250,
+image:"https://picsum.photos/250?4"
+}
+
+]
 
 const container=document.getElementById("products")
 
@@ -85,11 +98,8 @@ div.className="card"
 div.innerHTML=`
 
 <img src="${p.image}">
-
 <h3>${p.name}</h3>
-
 <p>$${p.price}</p>
-
 <button onclick='addToCart(${JSON.stringify(p)})'>Add to Cart</button>
 
 `
@@ -98,26 +108,17 @@ container.appendChild(div)
 
 })
 
-})
-
 }
+
+/* ---------------- CART ---------------- */
 
 function addToCart(product){
 
-fetch("/cart/add",{
+let cart = JSON.parse(localStorage.getItem("cart")) || []
 
-method:"POST",
+cart.push(product)
 
-headers:{'Content-Type':'application/json'},
-
-body:JSON.stringify({
-
-email:user.email,
-product:product
-
-})
-
-})
+localStorage.setItem("cart",JSON.stringify(cart))
 
 sendDataCloudEvent("AddToCart",product)
 
@@ -125,47 +126,44 @@ alert("Added to cart")
 
 }
 
+/* ---------------- LOAD CART ---------------- */
+
 function loadCart(){
 
-fetch(`/cart/${user.email}`)
-
-.then(res=>res.json())
-
-.then(items=>{
+let cart = JSON.parse(localStorage.getItem("cart")) || []
 
 const div=document.getElementById("cart")
 
-items.forEach(i=>{
+div.innerHTML=""
+
+cart.forEach(item=>{
 
 let p=document.createElement("p")
 
-p.innerText=i.name + " - $" + i.price
+p.innerText=item.name + " - $" + item.price
 
 div.appendChild(p)
 
 })
 
-})
-
 }
+
+/* ---------------- CHECKOUT ---------------- */
 
 function checkout(){
 
-fetch("/checkout",{
+let cart = JSON.parse(localStorage.getItem("cart")) || []
 
-method:"POST",
+if(cart.length===0){
 
-headers:{'Content-Type':'application/json'},
+alert("Cart empty")
+return
 
-body:JSON.stringify({
-
-email:user.email
-
-})
-
-})
+}
 
 sendDataCloudEvent("Purchase")
+
+localStorage.removeItem("cart")
 
 alert("Order placed!")
 
@@ -173,7 +171,21 @@ window.location="index.html"
 
 }
 
+/* ---------------- DATACLOUD EVENT ---------------- */
+
 function sendDataCloudEvent(eventType,product={}){
+
+const eventPayload={
+
+eventType:eventType,
+email:user?.email || "guest",
+productName:product.name || "",
+price:product.price || "",
+timestamp:new Date().toISOString()
+
+}
+
+/* Replace with real Data Cloud ingestion endpoint */
 
 fetch("https://YOUR-DATACLOUD-ENDPOINT/events",{
 
@@ -183,19 +195,11 @@ headers:{
 "Content-Type":"application/json"
 },
 
-body:JSON.stringify({
+body:JSON.stringify(eventPayload)
 
-eventType:eventType,
+}).catch(()=>{
 
-email:user?.email,
-
-productName:product.name,
-
-price:product.price,
-
-timestamp:new Date()
-
-})
+console.log("DataCloud endpoint not connected yet")
 
 })
 
