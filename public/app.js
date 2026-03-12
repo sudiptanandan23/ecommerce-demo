@@ -5,7 +5,7 @@ let user = JSON.parse(localStorage.getItem("user")) || null
 
 /* ---------------- AUTO CART COUNTER ---------------- */
 
-document.addEventListener("DOMContentLoaded",function(){
+document.addEventListener("DOMContentLoaded", function () {
 updateCartCounter()
 })
 
@@ -18,26 +18,26 @@ let users = JSON.parse(localStorage.getItem("users")) || []
 
 let newUser = {
 
-name:document.getElementById("name").value,
-email:document.getElementById("email").value,
-password:document.getElementById("password").value
+name: document.getElementById("name").value,
+email: document.getElementById("email").value,
+password: document.getElementById("password").value
 
 }
 
-if(users.find(u=>u.email===newUser.email)){
+if(users.find(u => u.email === newUser.email)){
 alert("User already exists")
 return
 }
 
 users.push(newUser)
 
-localStorage.setItem("users",JSON.stringify(users))
+localStorage.setItem("users", JSON.stringify(users))
 
 sendDataCloudEvent("UserRegistered")
 
 alert("Registration successful")
 
-window.location="login.html"
+window.location = "login.html"
 
 }
 
@@ -48,20 +48,19 @@ function login(){
 
 let users = JSON.parse(localStorage.getItem("users")) || []
 
-let email=document.getElementById("email").value
-let password=document.getElementById("password").value
+let email = document.getElementById("email").value
+let password = document.getElementById("password").value
 
-let found = users.find(u => u.email===email && u.password===password)
+let found = users.find(u => u.email === email && u.password === password)
 
 if(found){
 
-localStorage.setItem("user",JSON.stringify(found))
-
+localStorage.setItem("user", JSON.stringify(found))
 user = found
 
 sendDataCloudEvent("UserLogin")
 
-window.location="products.html"
+window.location = "products.html"
 
 }else{
 
@@ -85,7 +84,7 @@ const products=[
 
 ]
 
-const container=document.getElementById("products")
+const container = document.getElementById("products")
 
 if(!container) return
 
@@ -123,19 +122,15 @@ let cart = JSON.parse(localStorage.getItem("cart")) || []
 let existing = cart.find(item => item.id === product.id)
 
 if(existing){
-
 existing.qty++
-
 }else{
-
 product.qty = 1
 cart.push(product)
-
 }
 
-localStorage.setItem("cart",JSON.stringify(cart))
+localStorage.setItem("cart", JSON.stringify(cart))
 
-sendDataCloudEvent("AddToCart",product)
+sendDataCloudEvent("AddToCart", product)
 
 updateCartCounter()
 
@@ -155,7 +150,7 @@ let count = cart.reduce((sum,item)=> sum + item.qty,0)
 let counter=document.getElementById("cartCount")
 
 if(counter){
-counter.innerText=count
+counter.innerText = count
 }
 
 }
@@ -177,7 +172,7 @@ let total=0
 
 cart.forEach(item=>{
 
-let itemTotal=item.price * item.qty
+let itemTotal = item.price * item.qty
 total += itemTotal
 
 let row=document.createElement("tr")
@@ -226,12 +221,10 @@ let cart = JSON.parse(localStorage.getItem("cart")) || []
 let item = cart.find(p=>p.id===id)
 
 if(item){
-
 item.qty++
-
-localStorage.setItem("cart",JSON.stringify(cart))
-
 }
+
+localStorage.setItem("cart", JSON.stringify(cart))
 
 loadCartPage()
 
@@ -247,12 +240,10 @@ let cart = JSON.parse(localStorage.getItem("cart")) || []
 let item = cart.find(p=>p.id===id)
 
 if(item && item.qty>1){
-
 item.qty--
-
-localStorage.setItem("cart",JSON.stringify(cart))
-
 }
+
+localStorage.setItem("cart", JSON.stringify(cart))
 
 loadCartPage()
 
@@ -267,7 +258,7 @@ let cart = JSON.parse(localStorage.getItem("cart")) || []
 
 cart = cart.filter(item=>item.id!==id)
 
-localStorage.setItem("cart",JSON.stringify(cart))
+localStorage.setItem("cart", JSON.stringify(cart))
 
 loadCartPage()
 
@@ -325,11 +316,32 @@ function payNow(){
 let cart = JSON.parse(localStorage.getItem("cart")) || []
 
 if(cart.length===0){
-
 alert("Cart is empty")
 return
+}
+
+/* Customer information */
+
+let name = document.getElementById("name")?.value || user?.name || "Guest"
+let email = document.getElementById("email")?.value || user?.email || "guest@email.com"
+let phone = document.getElementById("phone")?.value || ""
+let address = document.getElementById("address")?.value || ""
+
+/* Create order */
+
+let order = {
+
+orderId: "ORD" + Date.now(),
+name: name,
+email: email,
+phone: phone,
+address: address,
+items: cart,
+date: new Date().toLocaleString()
 
 }
+
+localStorage.setItem("order", JSON.stringify(order))
 
 sendDataCloudEvent("Purchase")
 
@@ -339,12 +351,63 @@ updateCartCounter()
 
 alert("Payment Successful")
 
-window.location="order.html"
+window.location = "order.html"
 
 }
 
 
-/* ---------------- ABANDONED CART TRACKING ---------------- */
+/* ---------------- LOAD ORDER DETAILS ---------------- */
+
+function loadOrderDetails(){
+
+let order = JSON.parse(localStorage.getItem("order"))
+
+if(!order){
+
+document.querySelector(".order-container").innerHTML =
+"<h3>No order found</h3>"
+
+return
+}
+
+document.getElementById("orderName").innerText = order.name
+document.getElementById("orderEmail").innerText = order.email
+document.getElementById("orderPhone").innerText = order.phone
+document.getElementById("orderAddress").innerText = order.address
+
+let table=document.getElementById("orderItems")
+
+table.innerHTML=""
+
+let total=0
+
+order.items.forEach(item=>{
+
+let itemTotal=item.price * item.qty
+total += itemTotal
+
+let row=document.createElement("tr")
+
+row.innerHTML=`
+
+<td><img src="${item.image}" width="60"></td>
+<td>${item.name}</td>
+<td>$${item.price}</td>
+<td>${item.qty}</td>
+<td>$${itemTotal}</td>
+
+`
+
+table.appendChild(row)
+
+})
+
+document.getElementById("orderTotal").innerText="Grand Total: $" + total
+
+}
+
+
+/* ---------------- ABANDONED CART ---------------- */
 
 window.addEventListener("beforeunload",function(){
 
