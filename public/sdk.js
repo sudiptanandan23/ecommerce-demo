@@ -1,104 +1,234 @@
+document.addEventListener("DOMContentLoaded", function () {
+
+if (typeof SalesforceInteractions === "undefined") {
+console.error("SalesforceInteractions SDK not loaded");
+return;
+}
+
+SalesforceInteractions.setLoggingLevel("DEBUG");
+
 SalesforceInteractions.init({
-    cookieDomain: "sudiptanandan23.github.io",
-    consents: [
-        {
-            status: SalesforceInteractions.ConsentStatus.OptIn,
-            purpose: SalesforceInteractions.ConsentPurpose.Tracking,
-            provider: "Test Provider"
-        }
-    ]
-}).then(() => {
-    console.log("Salesforce Interactions Web SDK initialized successfully");
+cookieDomain: window.location.hostname
+}).then(()=>{
 
-    // ---------------- UPDATE CONSENT ----------------
-    SalesforceInteractions.updateConsents([
-        {
-            status: SalesforceInteractions.ConsentStatus.OptIn,
-            purpose: SalesforceInteractions.ConsentPurpose.Tracking,
-            provider: "Test Provider"
-        }
-    ]).then(() => {
-        console.log("Consent updated successfully");
+console.log("SDK Initialized");
 
-        // ---------------- AUTO PAGE VIEW ON LOAD ----------------
-        window.sendPageViewEvent();
-    });
+/* GLOBAL VARIABLES */
 
-    // ---------------- PAGE VIEW EVENT ----------------
-    window.sendPageViewEvent = function () {
-        SalesforceInteractions.sendEvent({
-            interaction: { name: "PageView" },
-            user: { identities: { email: JSON.parse(localStorage.getItem("user"))?.email || "guest" } },
-            attributes: { pageUrl: window.location.href, pageTitle: document.title }
-        });
-        console.log("PageView event sent");
-    };
+const USER_EMAIL = "sudipta_nandan+carttest@epam.com";
 
-    // ---------------- PRODUCT VIEW EVENT ----------------
-    window.sendProductViewEvent = function (product) {
-        SalesforceInteractions.sendEvent({
-            interaction: { name: "ProductView" },
-            user: { identities: { email: JSON.parse(localStorage.getItem("user"))?.email || "guest" } },
-            catalogObject: {
-                type: "Product",
-                id: product.id,
-                attributes: { name: product.name, price: product.price, imageUrl: product.image }
-            }
-        });
-        console.log("ProductView event sent", product);
-    };
+let deviceId = localStorage.getItem("deviceId");
+let sessionId = sessionStorage.getItem("sessionId");
+let pageStartTime = Date.now();
 
-    // ---------------- ADD TO CART EVENT ----------------
-    window.sendAddToCartEvent = function (product) {
-        SalesforceInteractions.sendEvent({
-            interaction: { name: "AddToCart" },
-            user: { identities: { email: JSON.parse(localStorage.getItem("user"))?.email || "guest" } },
-            catalogObject: {
-                type: "Product",
-                id: product.id,
-                attributes: { name: product.name, price: product.price, imageUrl: product.image }
-            }
-        });
-        console.log("AddToCart event sent", product);
-    };
+/* GENERATE IDS */
 
-    // ---------------- VIEW CART EVENT ----------------
-    window.sendViewCartEvent = function (cartSize) {
-        SalesforceInteractions.sendEvent({
-            interaction: { name: "ViewCart" },
-            user: { identities: { email: JSON.parse(localStorage.getItem("user"))?.email || "guest" } },
-            attributes: { cartItems: cartSize }
-        });
-        console.log("ViewCart event sent");
-    };
+if(!deviceId){
+deviceId="device-"+crypto.randomUUID();
+localStorage.setItem("deviceId",deviceId);
+}
 
-    // ---------------- CHECKOUT EVENT ----------------
-    window.sendCheckoutEvent = function () {
-        SalesforceInteractions.sendEvent({
-            interaction: { name: "CheckoutStart" },
-            user: { identities: { email: JSON.parse(localStorage.getItem("user"))?.email || "guest" } }
-        });
-        console.log("CheckoutStart event sent");
-    };
+if(!sessionId){
+sessionId="session-"+Date.now();
+sessionStorage.setItem("sessionId",sessionId);
+}
 
-    // ---------------- PURCHASE EVENT ----------------
-    window.sendPurchaseEvent = function (orderTotal) {
-        SalesforceInteractions.sendEvent({
-            interaction: { name: "Purchase" },
-            user: { identities: { email: JSON.parse(localStorage.getItem("user"))?.email || "guest" } },
-            attributes: { orderValue: orderTotal }
-        });
-        console.log("Purchase event sent");
-    };
+/* CONSENT */
 
-    // ---------------- ABANDONED CART EVENT ----------------
-    window.sendAbandonedCartEvent = function (cartSize) {
-        SalesforceInteractions.sendEvent({
-            interaction: { name: "AbandonedCart" },
-            user: { identities: { email: JSON.parse(localStorage.getItem("user"))?.email || "guest" } },
-            attributes: { cartItems: cartSize }
-        });
-        console.log("AbandonedCart event sent");
-    };
+SalesforceInteractions.updateConsents([{
+status: SalesforceInteractions.ConsentStatus.OptIn,
+purpose: SalesforceInteractions.ConsentPurpose.Tracking,
+provider:"Website"
+}]);
 
+
+/* GLOBAL EVENT FUNCTION */
+
+function sendEvent(name,type,attributes,catalog){
+
+SalesforceInteractions.sendEvent({
+
+interaction:{
+name:name,
+type:type
+},
+
+category:"Engagement",
+
+deviceId:deviceId,
+sessionId:sessionId,
+
+user:{
+identities:{
+email:USER_EMAIL
+}
+},
+
+catalogObject: catalog || null,
+
+attributes: attributes || {},
+
+sourceUrl:window.location.href,
+sourceUrlReferrer:document.referrer,
+
+dateTime:new Date().toISOString()
+
+});
+
+console.log("Event Sent:",name);
+
+}
+
+
+/* PAGE VIEW */
+
+sendEvent("Page View","webPageView",{});
+
+
+/* PRODUCT VIEW */
+
+window.trackProductView=function(product){
+
+sendEvent(
+"Product View",
+"catalogObjectView",
+{},
+{
+type:"Product",
+id:product.id,
+attributes:{
+name:product.name,
+price:product.price,
+imageUrl:product.image
+}
+}
+);
+
+};
+
+
+/* ADD TO CART */
+
+window.trackAddToCart=function(product){
+
+sendEvent(
+"Add To Cart",
+"cartAdd",
+{
+productName:product.name,
+price:product.price
+},
+{
+type:"Product",
+id:product.id,
+attributes:{
+name:product.name,
+price:product.price
+}
+}
+);
+
+};
+
+
+/* CART VIEW */
+
+window.trackViewCart=function(cart){
+
+sendEvent(
+"View Cart",
+"cartView",
+{
+cartSize:cart.length
+}
+);
+
+};
+
+
+/* QUANTITY CHANGE */
+
+window.trackQuantityChange=function(product,qty){
+
+sendEvent(
+"Cart Quantity Change",
+"cartUpdate",
+{
+productName:product.name,
+quantity:qty
+}
+);
+
+};
+
+
+/* REMOVE ITEM */
+
+window.trackRemoveItem=function(product){
+
+sendEvent(
+"Remove From Cart",
+"cartRemove",
+{
+productName:product.name
+}
+);
+
+};
+
+
+/* CHECKOUT START */
+
+window.trackCheckout=function(cartTotal){
+
+sendEvent(
+"Checkout Start",
+"cartCheckout",
+{
+cartValue:cartTotal
+}
+);
+
+};
+
+
+/* PURCHASE */
+
+window.trackPurchase=function(order){
+
+sendEvent(
+"Purchase",
+"order",
+{
+orderId:order.orderId,
+orderValue:order.total,
+itemCount:order.items.length
+}
+);
+
+};
+
+
+/* ABANDONED CART */
+
+window.addEventListener("beforeunload",function(){
+
+let cart = JSON.parse(localStorage.getItem("cart")) || [];
+
+if(cart.length>0){
+
+sendEvent(
+"Abandoned Cart",
+"cartAbandon",
+{
+cartSize:cart.length
+}
+);
+
+}
+
+});
+
+
+});
 });
