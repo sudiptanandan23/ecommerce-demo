@@ -3,8 +3,10 @@
 
 <head>
 
+<meta charset="UTF-8">
 <title>Order Details</title>
 
+<!-- Salesforce Data Cloud Web SDK -->
 <script src="https://cdn.c360a.salesforce.com/beacon/c360a/37350531-11e8-4591-a7b6-643ba484d8c5/scripts/c360a.min.js"></script>
 
 <link rel="stylesheet" href="style.css">
@@ -31,10 +33,11 @@
 
 <h3>Customer Details</h3>
 
-<p><strong>Name:</strong> <span id="orderName"></span></p>
-<p><strong>Email:</strong> <span id="orderEmail"></span></p>
-<p><strong>Phone:</strong> <span id="orderPhone"></span></p>
-<p><strong>Address:</strong> <span id="orderAddress"></span></p>
+<p><strong>Name:</strong> <span id="orderName">-</span></p>
+<p><strong>Email:</strong> <span id="orderEmail">-</span></p>
+<p><strong>Phone:</strong> <span id="orderPhone">-</span></p>
+<p><strong>Address:</strong> <span id="orderAddress">-</span></p>
+<p><strong>Date:</strong> <span id="orderDate">-</span></p>
 
 <h3>Order Items</h3>
 
@@ -61,7 +64,15 @@
 <script src="app.js"></script>
 
 <script>
+
+document.addEventListener("DOMContentLoaded", function(){
+
+updateCartCounter()
+
 loadOrderDetails()
+
+})
+
 </script>
 
 </body>
