@@ -1,4 +1,14 @@
-let user = JSON.parse(localStorage.getItem("user"))
+/* ---------------- USER SESSION ---------------- */
+
+let user = JSON.parse(localStorage.getItem("user")) || null
+
+
+/* ---------------- AUTO CART COUNTER ---------------- */
+
+document.addEventListener("DOMContentLoaded",function(){
+updateCartCounter()
+})
+
 
 /* ---------------- REGISTER ---------------- */
 
@@ -7,9 +17,16 @@ function register(){
 let users = JSON.parse(localStorage.getItem("users")) || []
 
 let newUser = {
+
 name:document.getElementById("name").value,
 email:document.getElementById("email").value,
 password:document.getElementById("password").value
+
+}
+
+if(users.find(u=>u.email===newUser.email)){
+alert("User already exists")
+return
 }
 
 users.push(newUser)
@@ -23,6 +40,7 @@ alert("Registration successful")
 window.location="login.html"
 
 }
+
 
 /* ---------------- LOGIN ---------------- */
 
@@ -39,6 +57,8 @@ if(found){
 
 localStorage.setItem("user",JSON.stringify(found))
 
+user = found
+
 sendDataCloudEvent("UserLogin")
 
 window.location="products.html"
@@ -50,6 +70,7 @@ alert("Invalid login")
 }
 
 }
+
 
 /* ---------------- PRODUCTS ---------------- */
 
@@ -66,6 +87,8 @@ const products=[
 
 const container=document.getElementById("products")
 
+if(!container) return
+
 container.innerHTML=""
 
 products.forEach(p=>{
@@ -74,10 +97,12 @@ let div=document.createElement("div")
 div.className="card"
 
 div.innerHTML=`
+
 <img src="${p.image}">
 <h3>${p.name}</h3>
 <p>$${p.price}</p>
 <button onclick='addToCart(${JSON.stringify(p)})'>Add to Cart</button>
+
 `
 
 container.appendChild(div)
@@ -88,7 +113,8 @@ updateCartCounter()
 
 }
 
-/* ---------------- CART ADD ---------------- */
+
+/* ---------------- ADD TO CART ---------------- */
 
 function addToCart(product){
 
@@ -97,10 +123,14 @@ let cart = JSON.parse(localStorage.getItem("cart")) || []
 let existing = cart.find(item => item.id === product.id)
 
 if(existing){
+
 existing.qty++
+
 }else{
+
 product.qty = 1
 cart.push(product)
+
 }
 
 localStorage.setItem("cart",JSON.stringify(cart))
@@ -109,9 +139,10 @@ sendDataCloudEvent("AddToCart",product)
 
 updateCartCounter()
 
-alert("Added to cart")
+alert(product.name + " added to cart")
 
 }
+
 
 /* ---------------- CART COUNTER ---------------- */
 
@@ -129,6 +160,7 @@ counter.innerText=count
 
 }
 
+
 /* ---------------- CART PAGE ---------------- */
 
 function loadCartPage(){
@@ -136,6 +168,8 @@ function loadCartPage(){
 let cart = JSON.parse(localStorage.getItem("cart")) || []
 
 const table=document.getElementById("cartTable")
+
+if(!table) return
 
 table.innerHTML=""
 
@@ -172,11 +206,16 @@ table.appendChild(row)
 
 })
 
-document.getElementById("cartTotal").innerText="Total: $" + total
+let totalDiv=document.getElementById("cartTotal")
+
+if(totalDiv){
+totalDiv.innerText="Total: $" + total
+}
 
 updateCartCounter()
 
 }
+
 
 /* ---------------- QUANTITY INCREASE ---------------- */
 
@@ -186,13 +225,18 @@ let cart = JSON.parse(localStorage.getItem("cart")) || []
 
 let item = cart.find(p=>p.id===id)
 
+if(item){
+
 item.qty++
 
 localStorage.setItem("cart",JSON.stringify(cart))
 
+}
+
 loadCartPage()
 
 }
+
 
 /* ---------------- QUANTITY DECREASE ---------------- */
 
@@ -202,15 +246,18 @@ let cart = JSON.parse(localStorage.getItem("cart")) || []
 
 let item = cart.find(p=>p.id===id)
 
-if(item.qty>1){
+if(item && item.qty>1){
+
 item.qty--
-}
 
 localStorage.setItem("cart",JSON.stringify(cart))
+
+}
 
 loadCartPage()
 
 }
+
 
 /* ---------------- REMOVE ITEM ---------------- */
 
@@ -226,6 +273,7 @@ loadCartPage()
 
 }
 
+
 /* ---------------- CHECKOUT TABLE ---------------- */
 
 function loadCheckout(){
@@ -234,17 +282,18 @@ let cart = JSON.parse(localStorage.getItem("cart")) || []
 
 const body=document.getElementById("checkoutBody")
 
+if(!body) return
+
 body.innerHTML=""
 
 let total=0
 
 cart.forEach(item=>{
 
-let row=document.createElement("tr")
-
 let itemTotal=item.price * item.qty
-
 total += itemTotal
+
+let row=document.createElement("tr")
 
 row.innerHTML=`
 
@@ -260,13 +309,27 @@ body.appendChild(row)
 
 })
 
-document.getElementById("grandTotal").innerText="Grand Total: $" + total
+let totalDiv=document.getElementById("grandTotal")
+
+if(totalDiv){
+totalDiv.innerText="Grand Total: $" + total
+}
 
 }
+
 
 /* ---------------- PAYMENT ---------------- */
 
 function payNow(){
+
+let cart = JSON.parse(localStorage.getItem("cart")) || []
+
+if(cart.length===0){
+
+alert("Cart is empty")
+return
+
+}
 
 sendDataCloudEvent("Purchase")
 
@@ -276,11 +339,12 @@ updateCartCounter()
 
 alert("Payment Successful")
 
-window.location="index.html"
+window.location="order.html"
 
 }
 
-/* ---------------- ABANDONED CART ---------------- */
+
+/* ---------------- ABANDONED CART TRACKING ---------------- */
 
 window.addEventListener("beforeunload",function(){
 
@@ -295,6 +359,7 @@ cartSize:cart.length
 }
 
 })
+
 
 /* ---------------- DATACLOUD EVENT ---------------- */
 
@@ -320,9 +385,10 @@ headers:{
 
 body:JSON.stringify(eventPayload)
 
-}).catch(()=>{
+})
+.catch(()=>{
 
-console.log("DataCloud endpoint not connected yet")
+console.log("DataCloud endpoint not connected")
 
 })
 
