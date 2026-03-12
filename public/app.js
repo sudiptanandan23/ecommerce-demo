@@ -128,11 +128,10 @@ product.qty = 1
 cart.push(product)
 }
 
-localStorage.setItem("cart", JSON.stringify(cart))
+localStorage.setItem("cart",JSON.stringify(cart))
 
-sendDataCloudEvent("AddToCart", product)
-
-updateCartCounter()
+// Send event to Data Cloud
+sendAddToCartEvent(product)
 
 alert(product.name + " added to cart")
 
