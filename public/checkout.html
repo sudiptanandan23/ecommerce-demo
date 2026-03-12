@@ -1,7 +1,57 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<meta charset="UTF-8">
+<title>Checkout</title>
 <link rel="stylesheet" href="style.css">
+</head>
 
-<h2>Checkout</h2>
+<body>
 
-<p>Your order will be processed.</p>
+<header>
 
-<button onclick="alert('Order placed!')">Place Order</button>
+<h1>Checkout</h1>
+
+</header>
+
+<section>
+
+<h2>Order Summary</h2>
+
+<p>Your order is ready to be placed.</p>
+
+<h3>Payment Details</h3>
+
+<input placeholder="Card Number">
+
+<br>
+
+<input placeholder="Expiry Date">
+
+<br>
+
+<input placeholder="CVV">
+
+<br>
+
+<button onclick="placeOrder()">Place Order</button>
+
+</section>
+
+<script>
+
+function placeOrder(){
+
+alert("Order placed successfully!")
+
+localStorage.removeItem("cart")
+
+window.location="index.html"
+
+}
+
+</script>
+
+</body>
+</html>
