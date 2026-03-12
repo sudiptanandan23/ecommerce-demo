@@ -1,64 +1,7 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Checkout - E-Commerce Demo</title>
-  <link rel="stylesheet" href="style.css">
-  <script>
-    window.onload = function() {
-      fetch('/user')
-        .then(res => res.json())
-        .then(data => {
-          if (!data.user) {
-            window.location.href = '/login.html';
-          } else {
-            document.getElementById('user').innerText = 'Logged in as: ' + data.user.username;
-            fetch('/api/cart')
-              .then(res => res.json())
-              .then(cartData => {
-                const list = document.getElementById('cart');
-                if (cartData.cart.length === 0) {
-                  list.innerHTML = '<li>Your cart is empty.</li>';
-                  document.getElementById('checkoutBtn').disabled = true;
-                } else {
-                  cartData.cart.forEach(item => {
-                    list.innerHTML += `<li>Product ID: ${item.productId}</li>`;
-                  });
-                }
-              });
-          }
-        });
-    }
-    function checkout() {
-      fetch('/api/checkout', { method: 'POST' })
-        .then(res => res.json())
-        .then(data => {
-          if (data.success) {
-            alert('Order placed! Order ID: ' + data.orderId);
-            window.location.href = '/products.html';
-          } else {
-            alert('Checkout failed: ' + (data.error || 'Unknown error'));
-          }
-        });
-    }
-  </script>
-</head>
-<body>
-  <header>
-    <h1>Checkout</h1>
-  </header>
-  <nav>
-    <a href="index.html">Home</a>
-    <a href="products.html">Products</a>
-    <a href="cart.html">Cart</a>
-    <a href="checkout.html">Checkout</a>
-    <a href="/logout">Logout</a>
-  </nav>
-  <div class="container">
-    <div id="user"></div>
-    <h2>Review Your Cart</h2>
-    <ul id="cart"></ul>
-    <button id="checkoutBtn" onclick="checkout()">Place Order</button>
-  </div>
-</body>
-</html>
+<link rel="stylesheet" href="style.css">
+
+<h2>Checkout</h2>
+
+<p>Your order will be processed.</p>
+
+<button onclick="alert('Order placed!')">Place Order</button>
