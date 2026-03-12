@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Products - E-Commerce Demo</title>
+  <link rel="stylesheet" href="style.css">
+  <script>
+    window.onload = function() {
+      fetch('/user')
+        .then(res => res.json())
+        .then(data => {
+          if (!data.user) {
+            window.location.href = '/login.html';
+          } else {
+            document.getElementById('user').innerText = 'Logged in as: ' + data.user.username;
+            fetch('/api/products')
+              .then(res => res.json())
+              .then(products => {
+                const list = document.getElementById('products');
+                products.forEach(p => {
+                  const li = document.createElement('li');
+                  li.innerHTML = `${p.name} - $${p.price} <button onclick="addToCart(${p.id})">Add to Cart</button>`;
+                  list.appendChild(li);
+                });
+              });
+          }
+        });
+    }
+    function addToCart(id) {
+      fetch('/api/cart', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ productId: id })
+      }).then(() => alert('Added to cart!'));
+    }
+  </script>
+</head>
+<body>
+  <header>
+    <h1>Products</h1>
+  </header>
+  <nav>
+    <a href="index.html">Home</a>
+    <a href="products.html">Products</a>
+    <a href="cart.html">Cart</a>
+    <a href="/logout">Logout</a>
+  </nav>
+  <div class="container">
+    <div id="user"></div>
+    <h2>Shop Items</h2>
+    <ul id="products"></ul>
+  </div>
+</body>
+</html>
