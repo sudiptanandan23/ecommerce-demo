@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<title>Order Details</title>
+
+<script src="https://cdn.c360a.salesforce.com/beacon/c360a/37350531-11e8-4591-a7b6-643ba484d8c5/scripts/c360a.min.js"></script>
+
+<link rel="stylesheet" href="style.css">
+
+</head>
+
+<body>
+
+<header>
+
+<h1>Order Confirmation</h1>
+
+<nav>
+<a href="index.html">Home</a>
+<a href="products.html">Products</a>
+<a href="cart.html">Cart (<span id="cartCount">0</span>)</a>
+</nav>
+
+</header>
+
+<h2 style="text-align:center;">Thank You For Your Order</h2>
+
+<div class="order-container">
+
+<h3>Customer Details</h3>
+
+<p><strong>Name:</strong> <span id="orderName"></span></p>
+<p><strong>Email:</strong> <span id="orderEmail"></span></p>
+<p><strong>Phone:</strong> <span id="orderPhone"></span></p>
+<p><strong>Address:</strong> <span id="orderAddress"></span></p>
+
+<h3>Order Items</h3>
+
+<table border="1" width="100%">
+
+<thead>
+<tr>
+<th>Image</th>
+<th>Product</th>
+<th>Price</th>
+<th>Quantity</th>
+<th>Total</th>
+</tr>
+</thead>
+
+<tbody id="orderItems"></tbody>
+
+</table>
+
+<h2 id="orderTotal"></h2>
+
+</div>
+
+<script src="app.js"></script>
+
+<script>
+loadOrderDetails()
+</script>
+
+</body>
+
+</html>
