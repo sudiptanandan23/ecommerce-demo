@@ -1,10 +1,51 @@
-body { font-family: Arial, sans-serif; background: #f4f4f4; margin: 0; }
-header { background: #3498db; color: #fff; padding: 1rem; text-align: center; }
-nav { background: #2980b9; text-align: center; padding: 0.5rem 0; }
-nav a { color: #fff; margin: 0 15px; text-decoration: none; font-weight: bold; }
-nav a:hover { text-decoration: underline; }
-.container { max-width: 800px; margin: 2rem auto; background: #fff; padding: 2rem; box-shadow: 0 0 10px rgba(0,0,0,0.1);}
-form label { display: block; margin-top: 1rem; }
-form input { width: 100%; padding: 0.5rem; margin-top: 0.5rem; }
-form button { margin-top: 1rem; padding: 0.5rem 1rem; background: #3498db; color: #fff; border: none; cursor: pointer; }
-form button:hover { background: #2980b9; }
+body{
+font-family:Arial;
+margin:0;
+background:#f5f5f5;
+text-align:center;
+}
+
+header{
+background:black;
+color:white;
+padding:15px;
+}
+
+.products{
+display:flex;
+justify-content:center;
+gap:20px;
+flex-wrap:wrap;
+padding:20px;
+}
+
+.card{
+background:white;
+padding:20px;
+border-radius:8px;
+width:200px;
+box-shadow:0 0 5px rgba(0,0,0,0.2);
+}
+
+.card img{
+width:100%;
+}
+
+button{
+background:black;
+color:white;
+border:none;
+padding:10px;
+cursor:pointer;
+margin-top:10px;
+}
+
+button:hover{
+background:#444;
+}
+
+input{
+padding:10px;
+margin:10px;
+width:200px;
+}
