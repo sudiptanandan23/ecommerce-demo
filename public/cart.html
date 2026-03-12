@@ -1,13 +1,43 @@
-<link rel="stylesheet" href="style.css">
+<!DOCTYPE html>
+<html>
 
-<h2>Your Cart</h2>
+<head>
+<meta charset="UTF-8">
+<title>Shopping Cart</title>
+<link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<header>
+
+<h1>Your Cart</h1>
+
+<nav>
+<a href="products.html">Continue Shopping</a>
+</nav>
+
+</header>
+
+<section>
+
+<h2>Items in Cart</h2>
 
 <div id="cart"></div>
 
-<a href="checkout.html">Checkout</a>
+<br>
+
+<a href="checkout.html">
+<button>Proceed to Checkout</button>
+</a>
+
+</section>
 
 <script src="app.js"></script>
 
 <script>
 loadCart()
 </script>
+
+</body>
+</html>
