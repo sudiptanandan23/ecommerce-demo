@@ -1,13 +1,13 @@
 document.addEventListener("DOMContentLoaded", function () {
 
 if (typeof SalesforceInteractions === "undefined") {
-console.error("SalesforceInteractions SDK not loaded");
-return;
+    console.error("SalesforceInteractions SDK not loaded");
+    return;
 }
 
 SalesforceInteractions.setLoggingLevel("DEBUG");
 
-/* GLOBAL VARIABLES */
+/* ---------------- GLOBAL VARIABLES ---------------- */
 
 const USER_EMAIL = "sudipta_nandan+carttest@epam.com";
 
@@ -15,214 +15,234 @@ let deviceId = localStorage.getItem("deviceId");
 let sessionId = sessionStorage.getItem("sessionId");
 let pageStartTime = Date.now();
 
-/* GENERATE IDS */
+/* ---------------- GENERATE DEVICE + SESSION ---------------- */
 
-if(!deviceId){
-deviceId="device-"+crypto.randomUUID();
-localStorage.setItem("deviceId",deviceId);
+if (!deviceId) {
+    deviceId = "device-" + crypto.randomUUID();
+    localStorage.setItem("deviceId", deviceId);
 }
 
-if(!sessionId){
-sessionId="session-"+Date.now();
-sessionStorage.setItem("sessionId",sessionId);
+if (!sessionId) {
+    sessionId = "session-" + Date.now();
+    sessionStorage.setItem("sessionId", sessionId);
 }
 
-/* GLOBAL EVENT FUNCTION */
+/* ---------------- INIT SDK ---------------- */
+
+SalesforceInteractions.init({
+
+    cookieDomain: window.location.hostname,
+
+    consents: [
+        {
+            status: SalesforceInteractions.ConsentStatus.OptIn,
+            purpose: SalesforceInteractions.ConsentPurpose.Tracking,
+            provider: "Website"
+        }
+    ]
+
+}).then(() => {
+
+console.log("Salesforce Interactions Web SDK initialized successfully");
+
+/* ---------------- UPDATE CONSENT ---------------- */
+
+SalesforceInteractions.updateConsents([
+    {
+        status: SalesforceInteractions.ConsentStatus.OptIn,
+        purpose: SalesforceInteractions.ConsentPurpose.Tracking,
+        provider: "Website"
+    }
+]).then(()=>{
+    console.log("Consent updated successfully");
+});
+
+
+/* ---------------- GLOBAL EVENT FUNCTION ---------------- */
 
 window.sendEvent = function(name,type,attributes,catalog){
 
-if(typeof SalesforceInteractions === "undefined"){
-console.warn("SDK not ready");
-return;
-}
+    let eventPayload = {
 
-let eventPayload = {
+        interaction:{
+            name:name,
+            type:type
+        },
 
-interaction:{
-name:name,
-type:type
-},
+        category:"Engagement",
 
-category:"Engagement",
+        deviceId:deviceId,
+        sessionId:sessionId,
 
-deviceId:deviceId,
-sessionId:sessionId,
+        user:{
+            identities:{
+                email: JSON.parse(localStorage.getItem("user"))?.email || USER_EMAIL || "guest"
+            }
+        },
 
-user:{
-identities:{
-email:USER_EMAIL
-}
-},
+        attributes: attributes || {},
 
-attributes: attributes || {},
+        sourceUrl:window.location.href,
+        sourceUrlReferrer:document.referrer,
 
-sourceUrl:window.location.href,
-sourceUrlReferrer:document.referrer,
+        dateTime:new Date().toISOString()
 
-dateTime:new Date().toISOString()
+    };
 
-};
+    if(catalog){
+        eventPayload.catalogObject = catalog;
+    }
 
-/* ADD CATALOG IF PRESENT */
+    SalesforceInteractions.sendEvent(eventPayload);
 
-if(catalog){
-eventPayload.catalogObject = catalog;
-}
-
-SalesforceInteractions.sendEvent(eventPayload);
-
-console.log("Event Sent:",name);
-
+    console.log("Event Sent:",name);
 };
 
 
-/* INIT SDK */
+/* ---------------- PAGE VIEW ---------------- */
 
-SalesforceInteractions.init({
-cookieDomain: window.location.hostname
-});
+window.sendPageViewEvent = function(){
 
-console.log("SDK Initialized");
+    sendEvent(
+        "Page View",
+        "webPageView",
+        {
+            pageUrl:window.location.href,
+            pageTitle:document.title
+        }
+    );
 
-/* CONSENT */
+};
 
-SalesforceInteractions.updateConsents([{
-status: SalesforceInteractions.ConsentStatus.OptIn,
-purpose: SalesforceInteractions.ConsentPurpose.Tracking,
-provider:"Website"
-}]);
-
-
-/* PAGE VIEW */
-
-sendEvent("Page View","webPageView",{});
+sendPageViewEvent();
 
 
-/* PRODUCT VIEW */
+/* ---------------- PRODUCT VIEW ---------------- */
 
-window.trackProductView=function(product){
+window.sendProductViewEvent = function(product){
 
 sendEvent(
-"Product View",
-"catalogObjectView",
-{},
-{
-type:"Product",
-id:product.id,
-attributes:{
-name:product.name,
-price:product.price,
-imageUrl:product.image
-}
-}
+    "Product View",
+    "catalogObjectView",
+    {},
+    {
+        type:"Product",
+        id:product.id,
+        attributes:{
+            name:product.name,
+            price:product.price,
+            imageUrl:product.image
+        }
+    }
 );
 
 };
 
 
-/* ADD TO CART */
+/* ---------------- ADD TO CART ---------------- */
 
-window.trackAddToCart=function(product){
+window.sendAddToCartEvent = function(product){
 
 sendEvent(
-"Add To Cart",
-"cartAdd",
-{
-productName:product.name,
-price:product.price
-},
-{
-type:"Product",
-id:product.id,
-attributes:{
-name:product.name,
-price:product.price
-}
-}
+    "Add To Cart",
+    "cartAdd",
+    {
+        productName:product.name,
+        price:product.price
+    },
+    {
+        type:"Product",
+        id:product.id,
+        attributes:{
+            name:product.name,
+            price:product.price,
+            imageUrl:product.image
+        }
+    }
 );
 
 };
 
 
-/* CART VIEW */
+/* ---------------- VIEW CART ---------------- */
 
-window.trackViewCart=function(cart){
+window.sendViewCartEvent = function(cart){
 
 sendEvent(
-"View Cart",
-"cartView",
-{
-cartSize:cart.length
-}
+    "View Cart",
+    "cartView",
+    {
+        cartItems:cart.length
+    }
 );
 
 };
 
 
-/* QUANTITY CHANGE */
+/* ---------------- QUANTITY CHANGE ---------------- */
 
-window.trackQuantityChange=function(product,qty){
+window.sendQuantityChangeEvent = function(product,qty){
 
 sendEvent(
-"Cart Quantity Change",
-"cartUpdate",
-{
-productName:product.name,
-quantity:qty
-}
+    "Cart Quantity Change",
+    "cartUpdate",
+    {
+        productName:product.name,
+        quantity:qty
+    }
 );
 
 };
 
 
-/* REMOVE ITEM */
+/* ---------------- REMOVE ITEM ---------------- */
 
-window.trackRemoveItem=function(product){
+window.sendRemoveItemEvent = function(product){
 
 sendEvent(
-"Remove From Cart",
-"cartRemove",
-{
-productName:product.name
-}
+    "Remove From Cart",
+    "cartRemove",
+    {
+        productName:product.name
+    }
 );
 
 };
 
 
-/* CHECKOUT */
+/* ---------------- CHECKOUT ---------------- */
 
-window.trackCheckout=function(cartTotal){
+window.sendCheckoutEvent = function(cartTotal){
 
 sendEvent(
-"Checkout Start",
-"cartCheckout",
-{
-cartValue:cartTotal
-}
+    "Checkout Start",
+    "cartCheckout",
+    {
+        cartValue:cartTotal
+    }
 );
 
 };
 
 
-/* PURCHASE */
+/* ---------------- PURCHASE ---------------- */
 
-window.trackPurchase=function(order){
+window.sendPurchaseEvent = function(order){
 
 sendEvent(
-"Purchase",
-"order",
-{
-orderId:order.orderId,
-orderValue:order.total,
-itemCount:order.items.length
-}
+    "Purchase",
+    "order",
+    {
+        orderId:order.orderId,
+        orderValue:order.total,
+        itemCount:order.items.length
+    }
 );
 
 };
 
 
-/* ABANDON CART */
+/* ---------------- ABANDONED CART ---------------- */
 
 window.addEventListener("beforeunload",function(){
 
@@ -231,15 +251,16 @@ let cart = JSON.parse(localStorage.getItem("cart")) || [];
 if(cart.length>0){
 
 sendEvent(
-"Abandoned Cart",
-"cartAbandon",
-{
-cartSize:cart.length
-}
+    "Abandoned Cart",
+    "cartAbandon",
+    {
+        cartSize:cart.length
+    }
 );
 
 }
 
 });
 
+});
 });
