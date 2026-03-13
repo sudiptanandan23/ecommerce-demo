@@ -1,7 +1,7 @@
 document.addEventListener("DOMContentLoaded", function () {
 
 if (typeof SalesforceInteractions === "undefined") {
-    console.error("SalesforceInteractions SDK not loaded");
+    console.error("[ERROR] SalesforceInteractions SDK not loaded");
     return;
 }
 
@@ -20,14 +20,18 @@ let pageStartTime = Date.now();
 if (!deviceId) {
     deviceId = "device-" + crypto.randomUUID();
     localStorage.setItem("deviceId", deviceId);
+    console.log("[DEBUG] New DeviceId Generated:", deviceId);
 }
 
 if (!sessionId) {
     sessionId = "session-" + Date.now();
     sessionStorage.setItem("sessionId", sessionId);
+    console.log("[DEBUG] New SessionId Generated:", sessionId);
 }
 
 /* ---------------- INIT SDK ---------------- */
+
+console.log("[DEBUG] Initializing SalesforceInteractions SDK...");
 
 SalesforceInteractions.init({
 
@@ -43,7 +47,7 @@ SalesforceInteractions.init({
 
 }).then(() => {
 
-console.log("Salesforce Interactions Web SDK initialized successfully");
+console.log("[SUCCESS] Salesforce Interactions SDK initialized");
 
 /* ---------------- UPDATE CONSENT ---------------- */
 
@@ -55,48 +59,71 @@ SalesforceInteractions.updateConsents([
     }
 ]);
 
-console.log("Consent updated successfully");
+console.log("[DEBUG] Consent Updated");
 
 /* ---------------- GLOBAL EVENT FUNCTION ---------------- */
 
 window.sendEvent = function(name, type, attributes, catalog){
 
-    let eventPayload = {
+console.log("--------------------------------------------------");
+console.log("[EVENT TRIGGERED]", name);
+console.log("[EVENT TYPE]", type);
+console.log("[TIMESTAMP]", new Date().toISOString());
 
-        interaction:{
-            name:name,
-            type:type
-        },
+let eventPayload = {
 
-        category:"Engagement",
+    interaction:{
+        name:name,
+        type:type
+    },
 
-        deviceId:deviceId,
-        sessionId:sessionId,
+    category:"Engagement",
 
-        user:{
-            identities:{
-                email: JSON.parse(localStorage.getItem("user"))?.email || USER_EMAIL || "guest"
-            }
-        },
+    deviceId:deviceId,
+    sessionId:sessionId,
 
-        attributes: attributes || {},
+    user:{
+        identities:{
+            email: JSON.parse(localStorage.getItem("user"))?.email || USER_EMAIL || "guest"
+        }
+    },
 
-        sourceUrl: window.location.href,
-        sourceUrlReferrer: document.referrer,
+    attributes: attributes || {},
 
-        dateTime: new Date().toISOString()
+    sourceUrl: window.location.href,
+    sourceUrlReferrer: document.referrer,
 
-    };
+    dateTime: new Date().toISOString()
 
-    /* ADD CATALOG OBJECT */
+};
 
-    if(catalog){
-        eventPayload.catalogObject = catalog;
-    }
+/* ADD CATALOG OBJECT */
 
-    SalesforceInteractions.sendEvent(eventPayload);
+if(catalog){
 
-    console.log("Event Sent:", name);
+    console.log("[CATALOG OBJECT]", catalog);
+
+    eventPayload.catalogObject = catalog;
+}
+
+console.log("[EVENT PAYLOAD]", eventPayload);
+
+/* SEND EVENT */
+
+try{
+
+SalesforceInteractions.sendEvent(eventPayload);
+
+console.log("[SUCCESS] Event sent to Salesforce:", name);
+
+}catch(error){
+
+console.error("[ERROR] Event failed:", name);
+console.error(error);
+
+}
+
+console.log("--------------------------------------------------");
 
 };
 
@@ -104,6 +131,8 @@ window.sendEvent = function(name, type, attributes, catalog){
 /* ---------------- PAGE VIEW EVENT ---------------- */
 
 window.sendPageViewEvent = function(){
+
+console.log("[DEBUG] Triggering Page View Event");
 
 sendEvent(
     "Page View",
@@ -122,6 +151,8 @@ sendPageViewEvent();
 /* ---------------- PRODUCT VIEW ---------------- */
 
 window.sendProductViewEvent = function(product){
+
+console.log("[DEBUG] Product View Triggered:", product);
 
 sendEvent(
     "Product View",
@@ -144,6 +175,8 @@ sendEvent(
 /* ---------------- ADD TO CART ---------------- */
 
 window.sendAddToCartEvent = function(product){
+
+console.log("[DEBUG] Add To Cart Triggered:", product);
 
 sendEvent(
     "Add To Cart",
@@ -170,6 +203,8 @@ sendEvent(
 
 window.sendViewCartEvent = function(cart){
 
+console.log("[DEBUG] View Cart Triggered:", cart);
+
 sendEvent(
     "View Cart",
     "cartView",
@@ -184,6 +219,8 @@ sendEvent(
 /* ---------------- QUANTITY CHANGE ---------------- */
 
 window.sendQuantityChangeEvent = function(product, qty){
+
+console.log("[DEBUG] Cart Quantity Change:", product, "New Qty:", qty);
 
 sendEvent(
     "Cart Quantity Change",
@@ -201,6 +238,8 @@ sendEvent(
 
 window.sendRemoveItemEvent = function(product){
 
+console.log("[DEBUG] Remove From Cart:", product);
+
 sendEvent(
     "Remove From Cart",
     "cartRemove",
@@ -216,6 +255,8 @@ sendEvent(
 
 window.sendCheckoutEvent = function(cartTotal){
 
+console.log("[DEBUG] Checkout Started. Cart Value:", cartTotal);
+
 sendEvent(
     "Checkout Start",
     "cartCheckout",
@@ -230,6 +271,8 @@ sendEvent(
 /* ---------------- PURCHASE ---------------- */
 
 window.sendPurchaseEvent = function(order){
+
+console.log("[DEBUG] Purchase Triggered:", order);
 
 sendEvent(
     "Purchase",
@@ -250,7 +293,11 @@ window.addEventListener("beforeunload", function(){
 
 let cart = JSON.parse(localStorage.getItem("cart")) || [];
 
+console.log("[DEBUG] Page Unload Triggered. Cart:", cart);
+
 if(cart.length > 0){
+
+console.log("[DEBUG] Abandoned Cart Event Triggered");
 
 sendEvent(
     "Abandoned Cart",
