@@ -53,14 +53,13 @@ SalesforceInteractions.updateConsents([
         purpose: SalesforceInteractions.ConsentPurpose.Tracking,
         provider: "Website"
     }
-]).then(()=>{
-    console.log("Consent updated successfully");
-});
+]);
 
+console.log("Consent updated successfully");
 
 /* ---------------- GLOBAL EVENT FUNCTION ---------------- */
 
-window.sendEvent = function(name,type,attributes,catalog){
+window.sendEvent = function(name, type, attributes, catalog){
 
     let eventPayload = {
 
@@ -82,12 +81,14 @@ window.sendEvent = function(name,type,attributes,catalog){
 
         attributes: attributes || {},
 
-        sourceUrl:window.location.href,
-        sourceUrlReferrer:document.referrer,
+        sourceUrl: window.location.href,
+        sourceUrlReferrer: document.referrer,
 
-        dateTime:new Date().toISOString()
+        dateTime: new Date().toISOString()
 
     };
+
+    /* ADD CATALOG OBJECT */
 
     if(catalog){
         eventPayload.catalogObject = catalog;
@@ -95,22 +96,23 @@ window.sendEvent = function(name,type,attributes,catalog){
 
     SalesforceInteractions.sendEvent(eventPayload);
 
-    console.log("Event Sent:",name);
+    console.log("Event Sent:", name);
+
 };
 
 
-/* ---------------- PAGE VIEW ---------------- */
+/* ---------------- PAGE VIEW EVENT ---------------- */
 
 window.sendPageViewEvent = function(){
 
-    sendEvent(
-        "Page View",
-        "webPageView",
-        {
-            pageUrl:window.location.href,
-            pageTitle:document.title
-        }
-    );
+sendEvent(
+    "Page View",
+    "webPageView",
+    {
+        pageUrl: window.location.href,
+        pageTitle: document.title
+    }
+);
 
 };
 
@@ -172,7 +174,7 @@ sendEvent(
     "View Cart",
     "cartView",
     {
-        cartItems:cart.length
+        cartItems: cart.length
     }
 );
 
@@ -181,7 +183,7 @@ sendEvent(
 
 /* ---------------- QUANTITY CHANGE ---------------- */
 
-window.sendQuantityChangeEvent = function(product,qty){
+window.sendQuantityChangeEvent = function(product, qty){
 
 sendEvent(
     "Cart Quantity Change",
@@ -244,17 +246,17 @@ sendEvent(
 
 /* ---------------- ABANDONED CART ---------------- */
 
-window.addEventListener("beforeunload",function(){
+window.addEventListener("beforeunload", function(){
 
 let cart = JSON.parse(localStorage.getItem("cart")) || [];
 
-if(cart.length>0){
+if(cart.length > 0){
 
 sendEvent(
     "Abandoned Cart",
     "cartAbandon",
     {
-        cartSize:cart.length
+        cartSize: cart.length
     }
 );
 
