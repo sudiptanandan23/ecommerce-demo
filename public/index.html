@@ -1,69 +1,165 @@
 <!DOCTYPE html>
-<html>
-
+<html lang="en">
 <head>
-
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Ecommerce Demo</title>
 
-<!-- Salesforce Data Cloud Web SDK -->
-<script src="https://cdn.c360a.salesforce.com/beacon/c360a/37350531-11e8-4591-a7b6-643ba484d8c5/scripts/c360a.min.js"></script>
-
-<script src="app.js"></script>
-  <script src="sdk.js"></script>
 <link rel="stylesheet" href="style.css">
+
+<!-- Salesforce Web SDK -->
+<script src="https://cdn.c360a.salesforce.com/beacon/sdk.js"></script>
+
+<!-- Tracking Script -->
+<script src="tracking.js" defer></script>
 
 </head>
 
 <body>
 
 <header>
+<h1>Ecommerce Demo Store</h1>
 
-<h1>My Ecommerce Store</h1>
-
-<nav>
-<a href="index.html">Home</a>
-<a href="products.html">Products</a>
-<a href="cart.html">Cart (<span id="cartCount">0</span>)</a>
-<a href="login.html">Login</a>
-<a href="register.html">Register</a>
-</nav>
-
+<button id="view-cart">🛒 View Cart</button>
 </header>
 
+<main>
 
-<section style="text-align:center;margin-top:40px;">
+<section class="products">
 
-<h2>Welcome to Our Store</h2>
+<!-- PRODUCT 1 -->
 
-<p>Discover amazing products at great prices.</p>
+<div class="product-card"
+data-product-id="prod-101"
+data-product-name="Running Shoes"
+data-product-price="1999"
+data-product-image="img/shoes.jpg">
 
-<br>
+<img src="img/shoes.jpg">
 
-<a href="products.html">
-<button>Shop Now</button>
-</a>
+<h3>Running Shoes</h3>
+
+<p>₹1999</p>
+
+<button class="add-to-cart"
+data-product-id="prod-101"
+data-product-name="Running Shoes"
+data-product-price="1999"
+data-product-image="img/shoes.jpg">
+
+Add To Cart
+
+</button>
+
+</div>
+
+
+<!-- PRODUCT 2 -->
+
+<div class="product-card"
+data-product-id="prod-102"
+data-product-name="Smart Watch"
+data-product-price="4999"
+data-product-image="img/watch.jpg">
+
+<img src="img/watch.jpg">
+
+<h3>Smart Watch</h3>
+
+<p>₹4999</p>
+
+<button class="add-to-cart"
+data-product-id="prod-102"
+data-product-name="Smart Watch"
+data-product-price="4999"
+data-product-image="img/watch.jpg">
+
+Add To Cart
+
+</button>
+
+</div>
+
+
+<!-- PRODUCT 3 -->
+
+<div class="product-card"
+data-product-id="prod-103"
+data-product-name="Bluetooth Headphones"
+data-product-price="2999"
+data-product-image="img/headphones.jpg">
+
+<img src="img/headphones.jpg">
+
+<h3>Bluetooth Headphones</h3>
+
+<p>₹2999</p>
+
+<button class="add-to-cart"
+data-product-id="prod-103"
+data-product-name="Bluetooth Headphones"
+data-product-price="2999"
+data-product-image="img/headphones.jpg">
+
+Add To Cart
+
+</button>
+
+</div>
+
+</section>
+
+</main>
+
+
+<!-- CART PANEL -->
+
+<section id="cart">
+
+<h2>Your Cart</h2>
+
+<div id="cart-items"></div>
+
+<button id="checkout">
+Proceed to Checkout
+</button>
 
 </section>
 
 
-<section class="featured-products">
+<!-- PURCHASE BUTTON (Demo Only) -->
 
-<h2 style="text-align:center;">Featured Products</h2>
+<section>
 
-<div id="products" class="products"></div>
+<button id="complete-order">
+Complete Purchase
+</button>
 
 </section>
-
-
 
 
 <script>
 
-updateCartCounter()
-loadProducts()
+/* DEMO PURCHASE EVENT */
+
+document.getElementById("complete-order").addEventListener("click", function(){
+
+const order = {
+orderId: "ORD-"+Date.now(),
+total: 7999,
+items:[
+{id:"prod-101"},
+{id:"prod-102"}
+]
+};
+
+document.dispatchEvent(
+new CustomEvent("purchaseComplete",{detail:order})
+);
+
+});
 
 </script>
 
 </body>
-
 </html>
